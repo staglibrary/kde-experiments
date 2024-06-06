@@ -4,3 +4,6 @@ argparse
 pandas
 matplotlib
 numpy
+pyyaml
+docker
+psutil

@@ -101,3 +101,33 @@ from the build directory, run the following command.
 
 This will run many KDE experiments with the STAG implementation on the provided
 dataset and write the results to the `../results/<dataset>.01.csv` file.
+
+## Running other experiments
+The DEANN directory contains the code for running the experiments with other 
+KDE algorithms.
+The code has been only slightly modified from
+[the original](https://github.com/mkarppa/deann-experiments)
+by the DEANN authors.
+
+To run the experiments, from the `DEANN` directory, run
+
+```bash
+python run_exp.py --dataset <dataset> --no-docker --kernel "gaussian" --kde-value 0.01
+```
+
+Then, to generate the results file, run
+
+```bash
+python data_export.py --dataset <dataset> --mu 0.01 -o results/<dataset>.01.csv
+```
+
+## Analysing the results
+Once the experiments have been run, to generate the results table and figures,
+we provide the `analyse_results.py` script in the `tools` directory.
+
+Running this script with 
+```bash
+python analyse_results.py
+```
+will produce plots and a latex table in the figures directory containing
+the running time comparison of the algorithms.

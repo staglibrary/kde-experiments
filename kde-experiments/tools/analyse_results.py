@@ -65,11 +65,11 @@ def nice_plot(xs, ys, x_label, y_label, filename=None):
 
 
 def get_stag_filename(dataset, mu):
-    return f"../results/{dataset}.{mu}.csv"
+    return f"../stag/results/{dataset}.{mu}.csv"
 
 
 def get_deann_filename(dataset, mu):
-    return f"../../deann-experiments/results/{dataset}.{mu}.csv"
+    return f"../DEANN/results/{dataset}.{mu}.csv"
 
 
 def load_stag_results(filename):
@@ -121,46 +121,11 @@ def get_best_running_times(dataset, mu, err):
     return best_times
 
 
-def plot_stag_stuff(stag_df):
-    # Find the stag result with the best running time
-    stag_df['log_invmu'] = np.log(1 / stag_df['mu'])
-    stag_good = stag_df[stag_df['rel_err'] <= TARGET_RELATIVE_ERROR]
-    best_query_time = stag_good.query_time.min()
-    best_stag_result = stag_good[stag_good['query_time'] == best_query_time]
-    print(best_stag_result.iloc[0])
-
-    stag_close = stag_good[stag_good['query_time'] <= 2 * best_query_time]
-    print(stag_close)
-
-    # Let's see how the k1 value affects the query_time
-    best_mu = best_stag_result.iloc[0].mu
-    best_offset = best_stag_result.iloc[0].offset
-    best_k1 = best_stag_result.iloc[0].k1
-    best_k2_constant = best_stag_result.iloc[0].k2_constant
-    all_k1s = stag_df[(stag_df['mu'] == best_mu) & (stag_df['offset'] == best_offset) & (stag_df['k2_constant'] == best_k2_constant)]
-    plt.plot(all_k1s['k1'], all_k1s['query_time'])
-    plt.plot(all_k1s['k1'], all_k1s['rel_err'])
-    plt.show()
-
-    # How about mu?
-    all_mus = stag_df[(stag_df['k1'] == best_k1) & (stag_df['offset'] == best_offset) & (stag_df['k2_constant'] == best_k2_constant)]
-    plt.plot(all_mus['log_invmu'], all_mus['query_time'])
-    plt.plot(all_mus['log_invmu'], all_mus['rel_err'])
-    plt.show()
-
-    # How about k2_constant?
-    all_k2s = stag_df[
-        (stag_df['k1'] == best_k1) & (stag_df['offset'] == best_offset) & (stag_df['mu'] == best_mu)]
-    plt.plot(all_k2s['k2_constant'], all_k2s['query_time'])
-    plt.plot(all_k2s['k2_constant'], all_k2s['rel_err'])
-    plt.show()
-
-
 def create_best_times_table():
     """Create a latex table with the best running times.."""
-    table_filename = "../../stag2/figures/times_table.tex"
+    table_filename = "../figures/times_table.tex"
     table_preamble = """\\begin{table} [htb]
-    \\caption{\\timestablecaption}
+    \\caption{The best per-query update times achieving a relative error of at most $0.1$.}
     \\label{tab:kde_times}
     \\centering
     \\begin{tabular}"""
@@ -222,7 +187,7 @@ def plot_running_times(dataset, mu, ymax=4):
         plt.legend(loc="upper right")
     ax = plt.gca()
     ax.set_ylim([0, ymax])
-    plt.savefig(f"../../stag2/figures/times_{dataset}_{mu}.pdf", format="pdf", bbox_inches="tight")
+    plt.savefig(f"../figures/times_{dataset}_{mu}.pdf", format="pdf", bbox_inches="tight")
     plt.show()
 
 
@@ -238,33 +203,9 @@ def plot_all_running_times():
             plot_running_times(dataset, mu, ymax=ymaxs[dataset][mu])
 
 
-def create_running_times_figure_tex():
-    figure_filename = "../../stag2/figures/times_figure.tex"
-
-    with open(figure_filename, 'w') as fout:
-        fout.write("""\\begin{figure}[thb]\n    \\centering\n""")
-
-        subfigures = []
-        for dataset in dataset_mus.keys():
-            new_str = """    \\begin{subfigure}[b]{0.49\\textwidth}
-        \\begin{center}\includegraphics[width=\\textwidth]{""" + f"figures/times_{dataset}_01.pdf" + """}""" + """
-        \\caption{\\""" + f"{dataset}" + """}
-        \\label{""" + f"fig:{dataset}01" + """}
-        \\end{center}
-    \\end{subfigure}\n"""
-
-            subfigures.append(new_str)
-
-        fout.write("""\\hfill\n""".join(subfigures))
-
-        fout.write("""    \\caption{\\timesfigcaption}\n    \\label{fig:times}\n\\end{figure}""")
-
-
-
 def main():
     create_best_times_table()
     plot_all_running_times()
-    create_running_times_figure_tex()
 
 
 if __name__ == "__main__":
